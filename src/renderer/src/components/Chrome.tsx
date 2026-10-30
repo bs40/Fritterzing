@@ -102,6 +102,17 @@ export function Toolbar(): ReactNode {
   )
 }
 
+const SNAP_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: 'off', label: 'Off (free)' },
+  { value: '0.05', label: '0.05 mm' },
+  { value: '0.1', label: '0.1 mm' },
+  { value: '0.25', label: '0.25 mm' },
+  { value: '0.5', label: '0.5 mm' },
+  { value: '1', label: '1 mm' },
+  { value: '1.27', label: '1.27 mm' },
+  { value: '2.54', label: '2.54 mm' }
+]
+
 const VIEWS: Array<{ id: ViewName; label: string }> = [
   { id: 'breadboard', label: 'Breadboard' },
   { id: 'schematic', label: 'Schematic' },
@@ -189,6 +200,7 @@ export function BottomBar(): ReactNode {
   const setShowLabels = useStore((s) => s.setShowLabels)
   const openDialog = useStore((s) => s.openDialog)
   const part = useStore((s) => s.part)!
+  const update = useStore((s) => s.update)
   const previewWires = useStore((s) => s.previewWires)
   const clearPreviewWires = useStore((s) => s.clearPreviewWires)
   const issues = useStore((s) => s.issues)
@@ -237,6 +249,18 @@ export function BottomBar(): ReactNode {
       )}
       <label className="row" style={{ cursor: 'pointer' }}>
         <input type="checkbox" checked={showLabels} onChange={(e) => setShowLabels(e.target.checked)} /> Labels
+      </label>
+      <label className="row" title="Dragged connectors snap to this step; arrow keys move by it (Shift: a tenth of it)">
+        <span className="dim">Snap</span>
+        <div style={{ width: 110 }}>
+          <Select<string>
+            value={part.settings.snapToGrid ? String(part.settings.gridMm) : 'off'}
+            options={SNAP_OPTIONS}
+            onChange={(v) =>
+              update((p) => ({ ...p, settings: { ...p.settings, snapToGrid: v !== 'off', gridMm: v === 'off' ? p.settings.gridMm : Number(v) } }))
+            }
+          />
+        </div>
       </label>
       <span className="status">{sum.label}</span>
     </div>

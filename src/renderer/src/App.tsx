@@ -124,7 +124,8 @@ export function App(): ReactNode {
         case 'ArrowDown': {
           if (!st.selection.length || st.view !== 'breadboard') return
           e.preventDefault()
-          const step = e.shiftKey ? 0.1 : 1
+          const base = st.part.settings.snapToGrid ? st.part.settings.gridMm : 1
+          const step = e.shiftKey ? base / 10 : base
           const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0
           const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0
           nudgeSelection(dx, dy)

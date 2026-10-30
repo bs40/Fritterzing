@@ -118,7 +118,7 @@ function ConnectorInspector(): ReactNode {
             <NumberField label="Height" value={hMm} unit="mm" min={0.2} step={0.1} onCommit={(v) => art && updateConnector(c.id, { breadboard: { ...c.breadboard!, h: sizeToPx(art, v ?? 1) } })} />
           </div>
           <div className="faint" style={{ fontSize: 11, marginBottom: 8 }}>
-            Arrow keys move 1 mm, Shift+arrows 0.1 mm.
+            Arrow keys move by the snap step ({part.settings.snapToGrid ? `${part.settings.gridMm} mm` : '1 mm'}), Shift+arrows by a tenth of it. Zoom in for finer dragging.
           </div>
         </>
       ) : (
@@ -303,8 +303,8 @@ function ArtworkInspector(): ReactNode {
       )}
 
       <h3 style={{ marginTop: 14 }}>Canvas</h3>
-      <Check label="Snap connectors to grid" checked={part.settings.snapToGrid} onChange={(snapToGrid) => update((p) => ({ ...p, settings: { ...p.settings, snapToGrid } }))} />
-      <NumberField label="Grid" value={part.settings.gridMm} unit="mm" min={0.1} step={0.01} onCommit={(v) => v && update((p) => ({ ...p, settings: { ...p.settings, gridMm: v } }))} />
+      <Check label="Snap connectors to a step when dragging" checked={part.settings.snapToGrid} onChange={(snapToGrid) => update((p) => ({ ...p, settings: { ...p.settings, snapToGrid } }))} />
+      <NumberField label="Snap step (also the arrow-key step)" value={part.settings.gridMm} unit="mm" min={0.01} step={0.01} onCommit={(v) => v && update((p) => ({ ...p, settings: { ...p.settings, gridMm: v } }))} />
     </div>
   )
 }

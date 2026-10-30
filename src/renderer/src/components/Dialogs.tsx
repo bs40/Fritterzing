@@ -171,12 +171,12 @@ function QuickAddDialog(): ReactNode {
   const part = useStore((s) => s.part)!
   const closeDialog = useStore((s) => s.closeDialog)
   const addConnectors = useStore((s) => s.addConnectors)
-  const lastKind = useStore((s) => s.lastKind)
-  const setLastKind = useStore((s) => s.setLastKind)
+  const defaults = useStore((s) => s.quickAddDefaults)
+  const setQuickAddDefaults = useStore((s) => s.setQuickAddDefaults)
   const [name, setName] = useState('')
-  const [kind, setKind] = useState<ConnectorKind>(lastKind)
-  const [gender, setGender] = useState<Gender>(kindInfo(lastKind).gender)
-  const [genderTouched, setGenderTouched] = useState(false)
+  const [kind, setKind] = useState<ConnectorKind>(defaults.kind)
+  const [gender, setGender] = useState<Gender>(defaults.gender)
+  const [genderTouched, setGenderTouched] = useState(defaults.gender !== kindInfo(defaults.kind).gender)
   const [description, setDescription] = useState('')
   const existing = part.connectors.map((c) => c.name)
   const nextNumber = nextConnectorNumber(part)
@@ -185,7 +185,7 @@ function QuickAddDialog(): ReactNode {
     if (!part.artwork) return closeDialog()
     const c = makeConnectorAt(part.artwork, data.natural, kind, { name: name.trim(), description: description.trim(), gender })
     addConnectors([c])
-    setLastKind(kind)
+    setQuickAddDefaults({ kind, gender })
     closeDialog()
   }
 
@@ -682,7 +682,7 @@ function HelpDialog(): ReactNode {
           <tr><td><kbd>G</kbd></td><td>Connector group</td></tr>
           <tr><td><kbd>P</kbd></td><td>Fritzing preview (drag wires)</td></tr>
           <tr><td><kbd>Esc</kbd></td><td>Back to the select tool</td></tr>
-          <tr><td><kbd>Arrows</kbd> / <kbd>Shift</kbd>+<kbd>Arrows</kbd></td><td>Move selected connectors by 1 mm / 0.1 mm</td></tr>
+          <tr><td><kbd>Arrows</kbd> / <kbd>Shift</kbd>+<kbd>Arrows</kbd></td><td>Move selected connectors by the snap step / a tenth of it (1 mm / 0.1 mm when snap is off)</td></tr>
           <tr><td><kbd>Delete</kbd></td><td>Delete selected connectors</td></tr>
           <tr><td><kbd>Ctrl</kbd>+<kbd>D</kbd></td><td>Duplicate selected connectors</td></tr>
           <tr><td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>Select all connectors</td></tr>

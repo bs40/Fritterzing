@@ -3,7 +3,7 @@
  * new Part object, and undo history simply keeps references to old ones.
  */
 import { create } from 'zustand'
-import type { Artwork, Connector, ConnectorKind, Metadata, Part, PcbConfig, SchematicConfig, ViewName } from '@core/model'
+import type { Artwork, Connector, ConnectorKind, Gender, Metadata, Part, PcbConfig, SchematicConfig, ViewName } from '@core/model'
 import type { Pt } from '@core/artwork'
 import type { Issue } from '@core/validate'
 
@@ -68,6 +68,8 @@ interface State {
   focusNameToken: number
   previewWires: PreviewWire[]
   showLabels: boolean
+  /** last choices made in the Quick add dialog (names and descriptions are not remembered) */
+  quickAddDefaults: { kind: ConnectorKind; gender: Gender }
 }
 
 interface Actions {
@@ -107,6 +109,7 @@ interface Actions {
   removePreviewWire(id: number): void
   clearPreviewWires(): void
   setShowLabels(v: boolean): void
+  setQuickAddDefaults(d: { kind: ConnectorKind; gender: Gender }): void
 }
 
 export type Store = State & Actions
@@ -138,6 +141,7 @@ export const useStore = create<Store>((set, get) => ({
   focusNameToken: 0,
   previewWires: [],
   showLabels: true,
+  quickAddDefaults: { kind: 'generic', gender: 'female' },
 
   loadPart: (part, file) =>
     set({
@@ -248,7 +252,8 @@ export const useStore = create<Store>((set, get) => ({
   addPreviewWire: (w) => set({ previewWires: [...get().previewWires, { ...w, id: wireSeq++ }] }),
   removePreviewWire: (id) => set({ previewWires: get().previewWires.filter((w) => w.id !== id) }),
   clearPreviewWires: () => set({ previewWires: [] }),
-  setShowLabels: (showLabels) => set({ showLabels })
+  setShowLabels: (showLabels) => set({ showLabels }),
+  setQuickAddDefaults: (quickAddDefaults) => set({ quickAddDefaults, lastKind: quickAddDefaults.kind })
 }))
 
 export function selectedConnectors(s: Store): Connector[] {
