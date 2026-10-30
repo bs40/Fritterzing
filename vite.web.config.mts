@@ -13,6 +13,7 @@ export default defineConfig({
       '@renderer': resolve('src/renderer/src')
     }
   },
-  server: { port: 5174, strictPort: true, fs: { allow: [resolve('.')] } },
+  // Polling: the project may live on a network share where file events do not arrive.
+  server: { port: 5174, strictPort: true, fs: { allow: [resolve('.')] }, watch: { usePolling: true, interval: 500 } },
   build: { outDir: resolve('dist/web'), emptyOutDir: true }
 })

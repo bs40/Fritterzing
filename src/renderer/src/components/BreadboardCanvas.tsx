@@ -445,7 +445,7 @@ export function BreadboardCanvas(): ReactNode {
           )}
 
           {/* preview wires */}
-          {previewWires.map((w) => {
+          {tool === 'preview' && previewWires.map((w) => {
             const a = wireEnd(w.from)
             const b = wireEnd(w.to)
             if (!a || !b) return null

@@ -4,7 +4,13 @@ import { mmToNatural, naturalToMm, rotated, sizeToMm, sizeToPx, withCrop, withHe
 import { NAME_PRESETS } from '@core/presets'
 import { resolveSchematicPins } from '@core/svg/schematic'
 import { round } from '@core/units'
-import { useStore, selectedConnectors } from '../store'
+import { useStore } from '../store'
+
+function useSelected(): Connector[] {
+  const part = useStore((s) => s.part)
+  const selection = useStore((s) => s.selection)
+  return useMemo(() => (part ? part.connectors.filter((c) => selection.includes(c.id)) : []), [part, selection])
+}
 import { Check, NumberField, Select, TextField } from './fields'
 import { FILTERS, platform } from '../platform'
 import { artworkFromFile } from '../files'
@@ -45,7 +51,7 @@ const SIDE_OPTIONS: Array<{ value: SchematicSide; label: string }> = [
 
 function ConnectorInspector(): ReactNode {
   const part = useStore((s) => s.part)!
-  const sel = useStore(selectedConnectors)
+  const sel = useSelected()
   const focusNameToken = useStore((s) => s.focusNameToken)
   const updateConnector = useStore((s) => s.updateConnector)
   const deleteConnectors = useStore((s) => s.deleteConnectors)
@@ -165,7 +171,7 @@ function ConnectorInspector(): ReactNode {
 }
 
 function MultiInspector(): ReactNode {
-  const sel = useStore(selectedConnectors)
+  const sel = useSelected()
   const updateConnectors = useStore((s) => s.updateConnectors)
   const deleteConnectors = useStore((s) => s.deleteConnectors)
   const ids = sel.map((c) => c.id)

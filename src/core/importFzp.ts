@@ -264,6 +264,7 @@ export function importFzpz(unpacked: UnpackedFzpz, fileName: string): ImportResu
         const w = pinBox ? Math.max(1e-3, pinBox.box.w) : 1
         const h = pinBox ? Math.max(1e-3, pinBox.box.h) : 1
         c.breadboard = { x: centre.cx - offX, y: centre.cy - offY, w, h }
+        if (Math.abs(w - h) > 0.1 * Math.max(w, h)) c.marker = 'rect'
       } else missingBb++
     } else missingBb++
     const sp = fc.views.schematic?.[0]
