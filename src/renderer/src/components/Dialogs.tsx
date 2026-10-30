@@ -7,6 +7,8 @@ import { NAME_PRESETS } from '@core/presets'
 import { round } from '@core/units'
 import { CONNECTOR_KINDS, type ConnectorKind } from '@core/model'
 import { makeConnectorAt } from '../ops'
+import logo from '../assets/logo.png'
+import sticker from '../assets/sticker.png'
 import { applyFix, availableFixes, summarize, type Issue } from '@core/validate'
 import { newModuleId } from '@core/ids'
 import { useStore } from '../store'
@@ -655,9 +657,15 @@ function HelpDialog(): ReactNode {
   const closeDialog = useStore((s) => s.closeDialog)
   return (
     <Modal title="Fritterzing help" wide onClose={closeDialog} footer={<button className="primary" onClick={closeDialog}>Close</button>}>
-      <p>
-        <b>Drop in a picture of an electronic component, click where the wires attach, name the connections, and export a working Fritzing part.</b>
-      </p>
+      <div className="row" style={{ alignItems: 'flex-start', gap: 16 }}>
+        <img src={sticker} alt="" aria-hidden="true" style={{ width: 96, flex: 'none' }} />
+        <div>
+          <img src={logo} alt="Fritterzing Parts Editor" style={{ width: 260, display: 'block', marginBottom: 6 }} />
+          <p style={{ margin: 0 }}>
+            <b>Drop in a picture of an electronic component, click where the wires attach, name the connections, and export a working Fritzing part.</b>
+          </p>
+        </div>
+      </div>
       <ol style={{ paddingLeft: 18 }}>
         <li>Drop a PNG, JPEG or SVG of the component onto the window (or use New).</li>
         <li>Enter its real width in millimetres, or use Calibrate scale and click two points a known distance apart.</li>

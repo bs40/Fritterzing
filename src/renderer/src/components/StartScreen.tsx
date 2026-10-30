@@ -3,14 +3,17 @@ import { useStore } from '../store'
 import { openWithDialog } from '../actions'
 import { platform } from '../platform'
 import { readProjectMeta } from '@core/project'
+import logo from '../assets/logo.png'
+import sticker from '../assets/sticker.png'
 
 export function StartScreen({ autosave }: { autosave: Uint8Array | null }): ReactNode {
   const openDialog = useStore((s) => s.openDialog)
   return (
     <div className="start">
       <div className="card">
-        <h1>Fritterzing</h1>
-        <div className="tagline">Fritzing Parts Editor. Drop in a picture of an electronic component, click where the wires attach, name the connections, and export a working Fritzing part.</div>
+        <img className="sticker" src={sticker} alt="" aria-hidden="true" />
+        <img className="logo" src={logo} alt="Fritterzing Parts Editor" />
+        <div className="tagline">Drop in a picture of an electronic component, click where the wires attach, name the connections, and export a working Fritzing part.</div>
         <div className="actions">
           <button className="big primary" onClick={() => openDialog('new')}>
             <b>Create new part</b>

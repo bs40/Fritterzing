@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/logo.png" alt="Fritterzing Parts Editor" width="640"></p>
+
 # Fritterzing
 
 **Fritzing Parts Editor.** Drop in a picture of an electronic component, click where the wires attach, name the connections, and export a working Fritzing part.

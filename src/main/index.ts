@@ -15,6 +15,8 @@ function createWindow(): BrowserWindow {
     show: false,
     autoHideMenuBar: true,
     backgroundColor: '#1e1f24',
+    // Packaged builds carry the icon in the executable; in development point at the source icon.
+    ...(app.isPackaged ? {} : { icon: join(app.getAppPath(), 'build/icon.png') }),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: true,

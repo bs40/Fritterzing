@@ -5,6 +5,7 @@ import { summarize } from '@core/validate'
 import { useStore } from '../store'
 import { exportFzpz, exportSingle, openWithDialog, saveProject, saveProjectAs, confirmDiscard } from '../actions'
 import { Select } from './fields'
+import logo from '../assets/logo.png'
 
 export function Toolbar(): ReactNode {
   const part = useStore((s) => s.part)
@@ -32,7 +33,7 @@ export function Toolbar(): ReactNode {
 
   return (
     <div className="toolbar">
-      <span className="title">Fritterzing</span>
+      <img className="toolbar-logo" src={logo} alt="Fritterzing" title="Fritterzing Parts Editor" onClick={() => openDialog('help')} />
       <button
         onClick={async () => {
           if (await confirmDiscard()) {
