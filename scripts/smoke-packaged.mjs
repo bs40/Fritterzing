@@ -86,10 +86,10 @@ try {
   await send('Runtime.enable')
   await send('Page.enable')
   // Give React a moment on slow machines.
-  for (let i = 0; i < 20 && (await js("document.querySelector('.start h1')?.textContent ?? ''")) !== 'Fritterzing'; i++) await sleep(500)
+  for (let i = 0; i < 20 && !(await js("!!document.querySelector('.start .logo')")); i++) await sleep(500)
 
   check('document title', (await js('document.title')) === 'Fritterzing')
-  check('start screen rendered', (await js("document.querySelector('.start h1')?.textContent")) === 'Fritterzing')
+  check('start screen rendered', (await js("document.querySelector('.start .logo')?.alt ?? ''")) === 'Fritterzing Parts Editor')
   const bridge = JSON.parse(await js('JSON.stringify({ e: !!window.fritterzing?.isElectron, n: Object.keys(window.fritterzing ?? {}).length })'))
   check('electron bridge present', bridge.e && bridge.n >= 10, `${bridge.n} functions`)
   const version = await js('window.fritterzing.appVersion()')
