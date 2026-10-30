@@ -39,7 +39,10 @@ npm test           # Pipeline tests (compile, validate, pack, import, project fi
 npm run typecheck
 npm run dist:win   # Windows installer and portable exe in release/
 npm run dist       # Installer for the current platform (nsis, dmg, AppImage/deb)
+npm run smoke -- "release/Fritterzing 0.1.0.exe"   # launch the packaged app and check it end to end
 ```
+
+The smoke test drives the packaged executable over the Chrome DevTools Protocol: it checks the start screen and the Electron file bridge, imports `files/YD7010_YaMoRC.fzpz` through the app's own drop handler, verifies that every connector is placed and the part validates, round-trips the autosave, and saves screenshots to `smoke-out/`. It closes the app and exits non-zero on any failure.
 
 ## How the generated part is structured
 
