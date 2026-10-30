@@ -1,0 +1,33 @@
+appId: org.fritterzing.app
+productName: Fritterzing
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**
+  - package.json
+asar: true
+win:
+  target:
+    - nsis
+    - portable
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  perMachine: false
+mac:
+  target:
+    - dmg
+  category: public.app-category.developer-tools
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Development
+fileAssociations:
+  - ext: fpe
+    name: Fritterzing Project
+    role: Editor
+  - ext: fzpz
+    name: Fritzing Part
+    role: Editor
