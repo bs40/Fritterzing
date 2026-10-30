@@ -1,15 +1,18 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { createConnector, type Artwork, type Part } from '@core/model'
-import { calibrated, type Pt } from '@core/artwork'
+import { createConnector, kindInfo, nextConnectorNumber, type Artwork, type Gender, type Part } from '@core/model'
+import { calibrated, naturalToMm, type Pt } from '@core/artwork'
 import { TEMPLATES, partFromTemplate } from '@core/templates'
 import { parseNames } from '@core/groups'
+import { NAME_PRESETS } from '@core/presets'
+import { round } from '@core/units'
 import { CONNECTOR_KINDS, type ConnectorKind } from '@core/model'
+import { makeConnectorAt } from '../ops'
 import { applyFix, availableFixes, summarize, type Issue } from '@core/validate'
 import { newModuleId } from '@core/ids'
 import { useStore } from '../store'
 import { FILTERS, platform } from '../platform'
 import { artworkFromFile } from '../files'
-import { loadProject } from '@core/project'
+import { loadProject, type ProjectMeta } from '@core/project'
 import { NumberField, Select, TextField, Check } from './fields'
 
 function Modal({ title, children, footer, wide, onClose }: { title: string; children: ReactNode; footer?: ReactNode; wide?: boolean; onClose?: () => void }): ReactNode {
@@ -36,6 +39,8 @@ export function Dialogs(): ReactNode {
   switch (dialog) {
     case 'new':
       return <NewPartDialog />
+    case 'quickadd':
+      return <QuickAddDialog />
     case 'metadata':
       return <MetadataDialog />
     case 'group':
@@ -153,6 +158,105 @@ function NewPartDialog(): ReactNode {
             <span>{t.description}</span>
           </button>
         ))}
+      </div>
+    </Modal>
+  )
+}
+
+/** Quick add mode: one dialog per click on the board. */
+function QuickAddDialog(): ReactNode {
+  const data = useStore((s) => s.dialogData) as { natural: Pt }
+  const part = useStore((s) => s.part)!
+  const closeDialog = useStore((s) => s.closeDialog)
+  const addConnectors = useStore((s) => s.addConnectors)
+  const lastKind = useStore((s) => s.lastKind)
+  const setLastKind = useStore((s) => s.setLastKind)
+  const [name, setName] = useState('')
+  const [kind, setKind] = useState<ConnectorKind>(lastKind)
+  const [gender, setGender] = useState<Gender>(kindInfo(lastKind).gender)
+  const [genderTouched, setGenderTouched] = useState(false)
+  const [description, setDescription] = useState('')
+  const existing = part.connectors.map((c) => c.name)
+  const nextNumber = nextConnectorNumber(part)
+
+  const ok = (): void => {
+    if (!part.artwork) return closeDialog()
+    const c = makeConnectorAt(part.artwork, data.natural, kind, { name: name.trim(), description: description.trim(), gender })
+    addConnectors([c])
+    setLastKind(kind)
+    closeDialog()
+  }
+
+  return (
+    <Modal
+      title={`New connector ${nextNumber}`}
+      onClose={closeDialog}
+      footer={
+        <>
+          <button onClick={closeDialog}>Cancel</button>
+          <button className="primary" onClick={ok}>
+            OK
+          </button>
+        </>
+      }
+    >
+      <datalist id="quickadd-presets">
+        {NAME_PRESETS.filter((n) => !existing.includes(n)).map((n) => (
+          <option key={n} value={n} />
+        ))}
+      </datalist>
+      <label className="field">
+        <span>Name</span>
+        <input
+          type="text"
+          autoFocus
+          list="quickadd-presets"
+          value={name}
+          placeholder="e.g. Track A, GND, SDA"
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && ok()}
+        />
+      </label>
+      <Select<ConnectorKind>
+        label="Type"
+        value={kind}
+        options={CONNECTOR_KINDS.map((k) => ({ value: k.id, label: k.label }))}
+        onChange={(k) => {
+          setKind(k)
+          if (!genderTouched) setGender(kindInfo(k).gender)
+        }}
+      />
+      <label className="field">
+        <span>Description</span>
+        <textarea value={description} placeholder="What this connection is for" onChange={(e) => setDescription(e.target.value)} />
+      </label>
+      <label className="field">
+        <span>Socket type</span>
+        <div className="row">
+          {(
+            [
+              ['female', 'Female (socket a wire or pin plugs into)'],
+              ['male', 'Male (pin that plugs in)'],
+              ['pad', 'Pad (surface contact)']
+            ] as Array<[Gender, string]>
+          ).map(([g, label]) => (
+            <label key={g} className="row" style={{ cursor: 'pointer' }}>
+              <input
+                type="radio"
+                name="quickadd-gender"
+                checked={gender === g}
+                onChange={() => {
+                  setGender(g)
+                  setGenderTouched(true)
+                }}
+              />
+              <span>{label}</span>
+            </label>
+          ))}
+        </div>
+      </label>
+      <div className="faint" style={{ fontSize: 11 }}>
+        Position: {part.artwork ? `${round(naturalToMm(part.artwork, data.natural).x, 1)}, ${round(naturalToMm(part.artwork, data.natural).y, 1)} mm` : ''}. You can move it afterwards by dragging.
       </div>
     </Modal>
   )
@@ -499,39 +603,50 @@ function ConfirmDiscardDialog(): ReactNode {
 }
 
 function RestoreDialog(): ReactNode {
-  const data = useStore((s) => s.dialogData) as { bytes: Uint8Array }
+  const data = useStore((s) => s.dialogData) as { bytes: Uint8Array; meta: ProjectMeta | null }
   const closeDialog = useStore((s) => s.closeDialog)
   const loadPart = useStore((s) => s.loadPart)
   const notify = useStore((s) => s.notify)
-  const update = useStore((s) => s.update)
+  const meta = data.meta
+  const when = meta?.savedAt ? new Date(meta.savedAt).toLocaleString() : 'unknown time'
+  const discard = async (): Promise<void> => {
+    await platform.autosaveClear()
+    closeDialog()
+  }
   return (
     <Modal
-      title="Restore autosaved work?"
+      title="Recover unsaved work?"
       onClose={closeDialog}
       footer={
         <>
-          <button onClick={closeDialog}>No thanks</button>
+          <button onClick={closeDialog}>Not now</button>
+          <button className="danger" onClick={discard}>
+            Discard it
+          </button>
           <button
             className="primary"
             onClick={async () => {
               try {
                 const p = await loadProject(data.bytes)
-                loadPart(p)
-                update((x) => x) // no-op
+                loadPart(p, { path: meta?.filePath ?? null, name: meta?.fileName ?? null })
                 useStore.setState({ dirty: true })
-                notify('Autosaved project restored. Save it to keep it.', 'success')
+                notify('Unsaved work recovered. Save it to keep it.', 'success')
               } catch (e) {
                 notify(`The autosave could not be read: ${(e as Error).message}`, 'error')
               }
               closeDialog()
             }}
           >
-            Restore
+            Recover
           </button>
         </>
       }
     >
-      <p>Fritterzing autosaved a part that was not saved to a project file. Restore it?</p>
+      <p>
+        Fritterzing has unsaved changes to <b>{meta?.title || 'an untitled part'}</b>
+        {meta?.fileName ? ` (${meta.fileName})` : ''}, autosaved at {when}. This happens when the app was closed or crashed before saving.
+      </p>
+      <p className="dim">Recover it to carry on where you left off. "Not now" keeps the autosave for next time.</p>
     </Modal>
   )
 }
@@ -554,7 +669,8 @@ function HelpDialog(): ReactNode {
       <h3>Keyboard</h3>
       <table className="help-table">
         <tbody>
-          <tr><td><kbd>A</kbd></td><td>Add connector tool</td></tr>
+          <tr><td><kbd>A</kbd></td><td>Add connector tool (places a marker, name it in the Inspector)</td></tr>
+          <tr><td><kbd>Q</kbd></td><td>Quick add mode (each click opens a dialog for name, type and description)</td></tr>
           <tr><td><kbd>G</kbd></td><td>Connector group</td></tr>
           <tr><td><kbd>P</kbd></td><td>Fritzing preview (drag wires)</td></tr>
           <tr><td><kbd>Esc</kbd></td><td>Back to the select tool</td></tr>

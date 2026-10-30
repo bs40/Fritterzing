@@ -7,10 +7,11 @@ import type { Artwork, Connector, ConnectorKind, Metadata, Part, PcbConfig, Sche
 import type { Pt } from '@core/artwork'
 import type { Issue } from '@core/validate'
 
-export type Tool = 'select' | 'add' | 'group' | 'calibrate' | 'crop' | 'preview'
+export type Tool = 'select' | 'add' | 'quickadd' | 'group' | 'calibrate' | 'crop' | 'preview'
 
 export type DialogId =
   | 'new'
+  | 'quickadd'
   | 'metadata'
   | 'group'
   | 'calibrate'

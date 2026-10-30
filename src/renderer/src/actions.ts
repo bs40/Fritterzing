@@ -5,6 +5,7 @@
 import { packFolderZip, packFzpz } from '@core/fzpz'
 import { summarize, validatePart } from '@core/validate'
 import type { Part } from '@core/model'
+import type { ProjectMeta } from '@core/project'
 import { compileForExport, newPartFromArtwork, openFile, projectBytes } from './files'
 import { FILTERS, platform, type LoadedFile } from './platform'
 import { useStore } from './store'
@@ -69,14 +70,20 @@ export function defaultFileBase(part: Part): string {
   return (part.metadata.title || 'part').replace(/[\\/:*?"<>|]+/g, '_').trim() || 'part'
 }
 
+export function projectMeta(part: Part, reason: ProjectMeta['reason']): ProjectMeta {
+  const st = S.getState()
+  return { title: part.metadata.title, filePath: st.filePath, fileName: st.fileName, savedAt: new Date().toISOString(), reason }
+}
+
 export async function saveProjectAs(): Promise<boolean> {
   const st = S.getState()
   if (!st.part) return false
-  const bytes = await projectBytes(st.part)
+  const bytes = await projectBytes(st.part, projectMeta(st.part, 'save'))
   const path = await platform.saveFileAs(`${defaultFileBase(st.part)}.fpe`, FILTERS.project, bytes)
   if (!path) return false
   st.markSaved(platform.isElectron ? path : null, path.split(/[\\/]/).pop() ?? path)
   st.notify(`Saved ${path.split(/[\\/]/).pop()}`, 'success')
+  await platform.autosaveClear()
   return true
 }
 
@@ -84,10 +91,11 @@ export async function saveProject(): Promise<boolean> {
   const st = S.getState()
   if (!st.part) return false
   if (!st.filePath || !platform.isElectron) return saveProjectAs()
-  const bytes = await projectBytes(st.part)
+  const bytes = await projectBytes(st.part, projectMeta(st.part, 'save'))
   await platform.writeFile(st.filePath, bytes)
   st.markSaved(st.filePath, st.fileName)
   st.notify(`Saved ${st.fileName}`, 'success')
+  await platform.autosaveClear()
   return true
 }
 

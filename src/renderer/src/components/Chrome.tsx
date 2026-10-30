@@ -211,6 +211,14 @@ export function BottomBar(): ReactNode {
       <button className={tool === 'add' ? 'active' : ''} disabled={!hasArt} onClick={() => setTool(tool === 'add' ? 'select' : 'add')} title="Add a connector: click where a wire attaches (A)">
         + Add connector
       </button>
+      <button
+        className={tool === 'quickadd' ? 'active' : ''}
+        disabled={!hasArt}
+        onClick={() => setTool(tool === 'quickadd' ? 'select' : 'quickadd')}
+        title="Quick add: each click on the board opens a dialog for name, type and description (Q)"
+      >
+        ⚡ Quick add
+      </button>
       <button className={tool === 'group' ? 'active' : ''} disabled={!hasArt} onClick={() => openDialog('group')} title="Add several evenly spaced connectors at once (G)">
         + Connector group
       </button>

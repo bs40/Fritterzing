@@ -4,7 +4,7 @@
  */
 import type { Artwork, Part } from '@core/model'
 import { createPart } from '@core/model'
-import { bytesToDataUrl, loadProject, saveProject } from '@core/project'
+import { bytesToDataUrl, loadProject, saveProject, type ProjectMeta } from '@core/project'
 import { unpackFzpz, type UnpackedFzpz } from '@core/fzpz'
 import { importFzpz } from '@core/importFzp'
 import { splitSvg } from '@core/svg/common'
@@ -132,12 +132,17 @@ export async function compileForExport(part: Part): Promise<CompiledPart> {
   return compilePart(part, { bakedRaster: baked })
 }
 
-export async function projectBytes(part: Part): Promise<Uint8Array> {
+export async function projectBytes(part: Part, meta: ProjectMeta): Promise<Uint8Array> {
   let compiled: CompiledPart | null = null
   try {
     compiled = await compileForExport(part)
   } catch {
     compiled = null
   }
-  return saveProject(part, compiled)
+  return saveProject(part, compiled, meta)
+}
+
+/** Autosave payload: the project without the generated files, so it is quick enough to write after every change. */
+export function autosaveBytes(part: Part, meta: ProjectMeta): Promise<Uint8Array> {
+  return saveProject(part, null, meta)
 }

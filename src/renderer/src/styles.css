@@ -340,6 +340,7 @@ kbd {
     var(--bg);
 }
 .canvas.tool-add svg.world,
+.canvas.tool-quickadd svg.world,
 .canvas.tool-group svg.world,
 .canvas.tool-calibrate svg.world,
 .canvas.tool-crop svg.world {

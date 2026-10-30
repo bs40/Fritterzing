@@ -11,9 +11,19 @@ import type { CompiledPart } from './compile'
 
 export const FPE_VERSION = 1
 
+/** Editor state stored next to the part (used by autosave recovery). */
+export interface ProjectMeta {
+  title: string
+  filePath: string | null
+  fileName: string | null
+  savedAt: string
+  reason: 'save' | 'autosave'
+}
+
 interface ProjectJson {
   fpeVersion: number
   app: string
+  meta?: ProjectMeta
   part: Omit<Part, 'artwork'> & { artwork: (Omit<Part['artwork'] & object, 'dataUrl' | 'svgText'> & { source: string }) | null }
 }
 
@@ -36,7 +46,7 @@ export function bytesToDataUrl(bytes: Uint8Array, mime: string): string {
   return `data:${mime};base64,${btoa(bin)}`
 }
 
-export async function saveProject(part: Part, compiled?: CompiledPart | null): Promise<Uint8Array> {
+export async function saveProject(part: Part, compiled?: CompiledPart | null, meta?: ProjectMeta): Promise<Uint8Array> {
   const zip = new JSZip()
   let artworkJson: ProjectJson['part']['artwork'] = null
   if (part.artwork) {
@@ -46,10 +56,23 @@ export async function saveProject(part: Part, compiled?: CompiledPart | null): P
     else zip.file(source, dataUrlToBytes(dataUrl))
     artworkJson = { ...rest, source }
   }
-  const json: ProjectJson = { fpeVersion: FPE_VERSION, app: 'Fritterzing', part: { ...part, artwork: artworkJson } }
+  const json: ProjectJson = { fpeVersion: FPE_VERSION, app: 'Fritterzing', meta, part: { ...part, artwork: artworkJson } }
   zip.file('project.json', JSON.stringify(json, null, 2))
   if (compiled) for (const f of compiled.files) zip.file(`generated/${f.fileName}`, f.content)
   return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' })
+}
+
+/** Read only the editor metadata of a project file (cheap; no artwork decoding). */
+export async function readProjectMeta(bytes: Uint8Array): Promise<ProjectMeta | null> {
+  try {
+    const zip = await JSZip.loadAsync(bytes)
+    const entry = zip.file('project.json')
+    if (!entry) return null
+    const json = JSON.parse(await entry.async('string')) as ProjectJson
+    return json.meta ?? (json.part ? { title: json.part.metadata?.title ?? '', filePath: null, fileName: null, savedAt: '', reason: 'autosave' } : null)
+  } catch {
+    return null
+  }
 }
 
 export async function loadProject(bytes: Uint8Array): Promise<Part> {

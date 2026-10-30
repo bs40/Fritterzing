@@ -117,6 +117,9 @@ export function BreadboardCanvas(): ReactNode {
         st.addConnector(c)
         break
       }
+      case 'quickadd':
+        st.openDialog('quickadd', { natural: toNatural(world) })
+        break
       case 'group': {
         const n = toNatural(world)
         if (!groupFirst) {
@@ -302,6 +305,8 @@ export function BreadboardCanvas(): ReactNode {
     switch (tool) {
       case 'add':
         return 'Click the image where a wire attaches. Esc to finish.'
+      case 'quickadd':
+        return 'Quick add: click the image where a wire attaches, then fill in the connector details. Esc to finish.'
       case 'group':
         return groupFirst ? 'Now click the LAST pin of the group.' : 'Click the FIRST pin of the group.'
       case 'calibrate':

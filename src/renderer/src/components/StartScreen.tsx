@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useStore } from '../store'
 import { openWithDialog } from '../actions'
 import { platform } from '../platform'
+import { readProjectMeta } from '@core/project'
 
 export function StartScreen({ autosave }: { autosave: Uint8Array | null }): ReactNode {
   const openDialog = useStore((s) => s.openDialog)
@@ -22,8 +23,8 @@ export function StartScreen({ autosave }: { autosave: Uint8Array | null }): Reac
         </div>
         {autosave && (
           <div className="row" style={{ marginTop: 12 }}>
-            <button onClick={() => openDialog('restore', { bytes: autosave })}>Restore autosaved work</button>
-            <span className="dim">A part that was not saved to a project file was autosaved.</span>
+            <button onClick={() => void readProjectMeta(autosave).then((meta) => openDialog('restore', { bytes: autosave, meta }))}>Recover unsaved work</button>
+            <span className="dim">Changes that were autosaved but never saved to a project file.</span>
           </div>
         )}
         <div className="dropzone">Or drop an image, .fzpz, .fzp or .fpe file anywhere in this window</div>

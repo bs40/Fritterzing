@@ -8,11 +8,13 @@ Fritterzing hides Fritzing's part format completely. You work with pictures, soc
 
 1. **Drop an image** (PNG, JPEG or SVG) of the module onto the window, or press *New* and choose one. A product photo is fine: the picture is embedded exactly as supplied and never traced.
 2. **Enter its real width** in millimetres, or press *Calibrate scale…* and click two points a known distance apart (for example 5.08 mm between two screw terminals).
-3. **Add connectors.** Press *Add connector* (or `A`) and click each place a wire attaches. Type a name; common names such as `GND`, `SDA`, `TX` autocomplete. *Connector group* places a whole row of pins between two clicks.
+3. **Add connectors.** Press *Quick add* (or `Q`): every click on the board opens a small dialog for the name, type, description and socket type. *Add connector* (`A`) places markers without the dialog, naming them in the Inspector. Common names such as `GND`, `SDA`, `TX` autocomplete. *Connector group* places a whole row of pins between two clicks.
 4. **Check the schematic**, generated automatically on Fritzing's 0.1 inch grid. Reorder pins or move them to another side in the panel on the right. Decide in *PCB* whether the part is PCB mounted; wiring-only devices stay off the PCB.
 5. **Export Fritzing Part** when the indicator says *Ready to export*. Open the `.fzpz` in Fritzing (File › Open, or drag it onto the parts bin) and wire it up. *Fritzing preview* lets you try the wiring beforehand.
 
 Problems are reported in plain language ("Track B has no connection point in Breadboard View") and most offer a one-click repair.
+
+Every change is autosaved within half a second. If the app crashes or is closed without saving, the next start offers to recover the unsaved work; a successful save clears the autosave.
 
 ## Opening existing parts
 

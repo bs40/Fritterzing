@@ -18,7 +18,9 @@ export interface Platform {
   saveFileAs(defaultName: string, filters: FileFilter[], bytes: Uint8Array): Promise<string | null>
   writeFile(path: string, bytes: Uint8Array): Promise<string>
   autosaveWrite(bytes: Uint8Array): Promise<void>
+  /** Returns null when there is no autosave (or it was cleared). */
   autosaveRead(): Promise<LoadedFile | null>
+  autosaveClear(): Promise<void>
   openExternal(url: string): void
 }
 
@@ -46,7 +48,13 @@ function electronPlatform(api: NonNullable<Window['fritterzing']>): Platform {
     autosaveWrite: async (bytes) => {
       await api.autosaveWrite(bytes)
     },
-    autosaveRead: () => api.autosaveRead(),
+    autosaveRead: async () => {
+      const f = await api.autosaveRead()
+      return f && f.bytes.length > 0 ? f : null
+    },
+    autosaveClear: async () => {
+      await api.autosaveWrite(new Uint8Array())
+    },
     openExternal: (url) => void api.openExternal(url)
   }
 }
@@ -120,9 +128,22 @@ function browserPlatform(): Platform {
           req.onsuccess = () => resolve(req.result as Uint8Array | undefined)
           req.onerror = () => reject(req.error)
         })
-        return bytes ? { path: null, name: 'autosave.fpe', bytes } : null
+        return bytes && bytes.length > 0 ? { path: null, name: 'autosave.fpe', bytes } : null
       } catch {
         return null
+      }
+    },
+    autosaveClear: async () => {
+      try {
+        const db = await idb()
+        await new Promise<void>((resolve, reject) => {
+          const tx = db.transaction(STORE, 'readwrite')
+          tx.objectStore(STORE).delete('current')
+          tx.oncomplete = () => resolve()
+          tx.onerror = () => reject(tx.error)
+        })
+      } catch {
+        /* best effort */
       }
     },
     openExternal: (url) => window.open(url, '_blank', 'noopener')

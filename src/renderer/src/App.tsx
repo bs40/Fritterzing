@@ -2,8 +2,9 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useStore } from './store'
 import { useValidation } from './useValidation'
 import { platform } from './platform'
-import { exportFzpz, filesFromDrop, openFiles, openWithDialog, saveProject, confirmDiscard } from './actions'
-import { projectBytes } from './files'
+import { exportFzpz, filesFromDrop, openFiles, openWithDialog, saveProject, confirmDiscard, projectMeta } from './actions'
+import { autosaveBytes } from './files'
+import { readProjectMeta } from '@core/project'
 import { nudgeSelection, duplicateSelection } from './ops'
 import { Toolbar, Sidebar, BottomBar, Notices } from './components/Chrome'
 import { BreadboardCanvas } from './components/BreadboardCanvas'
@@ -21,19 +22,24 @@ export function App(): ReactNode {
   const dragDepth = useRef(0)
   useValidation()
 
-  // Offer to restore an autosave on first start.
+  // Crash recovery: if an autosave exists when the app starts, offer it straight away.
   useEffect(() => {
-    void platform.autosaveRead().then((f) => {
-      if (f && f.bytes.length > 0) setAutosave(f.bytes)
+    void platform.autosaveRead().then(async (f) => {
+      if (!f) return
+      setAutosave(f.bytes)
+      const meta = await readProjectMeta(f.bytes)
+      if (!useStore.getState().part) useStore.getState().openDialog('restore', { bytes: f.bytes, meta })
     })
   }, [])
 
-  // Autosave the working project a few seconds after every change.
+  // Autosave after every change (shortly after, so a drag is written once). Cleared again by a successful save.
   useEffect(() => {
     if (!part || !dirty) return
     const t = setTimeout(() => {
-      void projectBytes(part).then((bytes) => platform.autosaveWrite(bytes))
-    }, 3000)
+      void autosaveBytes(part, projectMeta(part, 'autosave'))
+        .then((bytes) => platform.autosaveWrite(bytes))
+        .catch(() => undefined)
+    }, 400)
     return () => clearTimeout(t)
   }, [part, dirty])
 
@@ -127,6 +133,10 @@ export function App(): ReactNode {
         case 'a':
         case 'A':
           if (st.view === 'breadboard' && st.part.artwork) st.setTool(st.tool === 'add' ? 'select' : 'add')
+          break
+        case 'q':
+        case 'Q':
+          if (st.view === 'breadboard' && st.part.artwork) st.setTool(st.tool === 'quickadd' ? 'select' : 'quickadd')
           break
         case 'g':
         case 'G':
