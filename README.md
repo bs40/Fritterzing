@@ -16,6 +16,14 @@ Problems are reported in plain language ("Track B has no connection point in Bre
 
 Every change is autosaved within half a second. If the app crashes or is closed without saving, the next start offers to recover the unsaved work; a successful save clears the autosave.
 
+## Verified with Fritzing 1.0.8
+
+The sample export in `files/` was opened in Fritzing 1.0.8 on Windows: it imports into the MINE bin, places on the breadboard at the right physical size, hovering a terminal shows its name and description, a wire dragged from the TRACK A screw snaps to it, and the generated schematic symbol shows that pin as connected.
+
+| Editor | Fritzing breadboard view | Fritzing schematic view |
+| --- | --- | --- |
+| ![Fritterzing editor](docs/fritterzing-editor.png) | ![Wire on TRACK A in Fritzing](docs/fritzing-breadboard-wire.png) | ![Generated schematic in Fritzing](docs/fritzing-schematic.png) |
+
 ## Opening existing parts
 
 Open or drop a `.fzpz` to inspect, repair and re-export a part. Fritterzing recovers the connector positions from the SVGs, keeps the original graphics, lifts a picture back out of an SVG wrapper so it can be cropped and rotated, and shows a diagnostics summary. Dropping a bare `.fzp` together with its SVG files works too.
