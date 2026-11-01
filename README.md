@@ -2,6 +2,17 @@
 
 # Fritterzing
 
+## ⬇ Download
+
+**Windows:** get the installer from the **[latest release](https://github.com/bs40/Fritterzing/releases/latest)**:
+
+| File | Use it when |
+| --- | --- |
+| **[Fritterzing Setup 0.1.0.exe](https://github.com/bs40/Fritterzing/releases/latest/download/Fritterzing.Setup.0.1.0.exe)** | You want a normal install with a Start-menu entry (recommended). |
+| [Fritterzing 0.1.0.exe](https://github.com/bs40/Fritterzing/releases/latest/download/Fritterzing.0.1.0.exe) | You want a portable exe that runs without installing. |
+
+The builds are not code-signed, so Windows SmartScreen may show "Windows protected your PC": choose *More info* › *Run anyway*. macOS and Linux users can build from source (see [Building](#building)).
+
 **Fritzing Parts Editor.** Drop in a picture of an electronic component, click where the wires attach, name the connections, and export a working Fritzing part.
 
 Fritterzing hides Fritzing's part format completely. You work with pictures, sockets, pins and names; the application generates the `.fzp` definition, the breadboard, schematic, PCB and icon SVGs, every `connectorN` / `connectorNpin` / `connectorNterminal` id, the layer ids and the `.fzpz` package.
@@ -53,6 +64,8 @@ npm run dist:win   # Windows installer and portable exe in release/
 npm run dist       # Installer for the current platform (nsis, dmg, AppImage/deb)
 npm run smoke -- "release/Fritterzing 0.1.0.exe"   # launch the packaged app and check it end to end
 ```
+
+If the checkout lives on a network share, `powershell -File scripts/package-win.ps1` packages from a local staging copy (output in `dist/win/`), which avoids file-walk errors electron-builder hits on shares.
 
 The smoke test drives the packaged executable over the Chrome DevTools Protocol: it checks the start screen and the Electron file bridge, imports `files/YD7010_YaMoRC.fzpz` through the app's own drop handler, verifies that every connector is placed and the part validates, round-trips the autosave, and saves screenshots to `smoke-out/`. It closes the app and exits non-zero on any failure.
 
