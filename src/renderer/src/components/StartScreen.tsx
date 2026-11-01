@@ -37,6 +37,12 @@ export function StartScreen({ autosave }: { autosave: Uint8Array | null }): Reac
             fritzing.org
           </a>
         </div>
+        <div className="faint" style={{ marginTop: 6, fontSize: 11 }}>
+          Provided as-is with no guarantees of any kind. Usage is entirely at your own risk.{' '}
+          <a href="#" onClick={(e) => { e.preventDefault(); openDialog('help') }} style={{ color: 'var(--accent)' }}>
+            Full disclaimer
+          </a>
+        </div>
       </div>
     </div>
   )

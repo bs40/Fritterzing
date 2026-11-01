@@ -76,4 +76,8 @@ The smoke test drives the packaged executable over the Chrome DevTools Protocol:
 
 `files/YD7010_YaMoRC.fzpz` is a sample part used by the tests.
 
+## Disclaimer
+
+This software is provided **as-is** and offers **no guarantees of any kind**. **Usage is entirely at your own risk.** The authors accept no liability for any loss or damage arising from its use or from parts, files or diagrams produced with it; check generated parts against the manufacturer's documentation before connecting real hardware. See [DISCLAIMER.md](DISCLAIMER.md). Fritterzing is an independent project, not affiliated with or endorsed by the Fritzing project.
+
 MIT licence.

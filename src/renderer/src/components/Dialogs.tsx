@@ -696,6 +696,10 @@ function HelpDialog(): ReactNode {
       <p className="dim">
         <b>.fpe</b> is Fritterzing's editable project (artwork, connectors, settings). <b>.fzpz</b> is the Fritzing part you export, and can also be opened here to inspect or repair an existing part.
       </p>
+      <h3>Disclaimer</h3>
+      <p className="dim">
+        This software is provided as-is and offers no guarantees of any kind. Usage is entirely at your own risk. The authors accept no liability for any loss or damage arising from its use or from parts produced with it; check generated parts against the manufacturer's documentation before connecting real hardware. Fritterzing is an independent project, not affiliated with the Fritzing project.
+      </p>
     </Modal>
   )
 }

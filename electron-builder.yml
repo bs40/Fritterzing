@@ -6,6 +6,11 @@ directories:
 files:
   - out/**
   - package.json
+extraResources:
+  - from: DISCLAIMER.md
+    to: DISCLAIMER.md
+  - from: LICENSE
+    to: LICENSE
 asar: true
 win:
   target:
